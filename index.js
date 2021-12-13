@@ -1,3 +1,6 @@
+//Project Insights
+//1. Speech Synthesis Utterance interface is part of webspeech API, represents speech request. It contains the content the speech service should read and info about how to read.
+
 
   //new speechsynthesis utterance: what the person is going to say
   const msg = new SpeechSynthesisUtterance();
