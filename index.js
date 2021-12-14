@@ -1,101 +1,98 @@
 //Project Insights
-//1. Speech Synthesis Utterance interface is part of webspeech API, represents speech request. It contains the content the speech service should read and info about how to read.
+// 1. SpeechSynthesisUtterance interface is part of web speech API, it represents speech request. It contains content to be read and provides info on how to be read etc.  
+// 2. speechSynthesis is a global varible that lives inside browser
 
 
-  //new speechsynthesis utterance: what the person is going to say
-  const msg = new SpeechSynthesisUtterance();
 
-  //empty array to fill voices
-  let voices = [];
 
-  //who will say it
-  const voicesDropdown = document.querySelector('[name="voice"]');
+//creating content to deliver
+const msg = new SpeechSynthesisUtterance;
 
-  //how fast/slow it will be said
-  //pitch update
-  //what is going to be said
-  const options = document.querySelectorAll('[type="range"], [name="text"]');
+//creating empty array to be filled in by voices
+let voices = [];
 
-  //start speaking
-  const speakButton = document.querySelector('#speak');
+//grabbing dropdown
+const voicesDropdown = document.querySelector("[name='voice']");
 
-  //stop speaking
-  const stopButton = document.querySelector('#stop');
+//grabbing all inputs( type = range) and text area
+const options = document.querySelectorAll("[type='range'], [name='text']");
 
-  //on page reload make text area content constant
-  msg.text = document.querySelector("[name='text']").value;
+//grabbing speak button
+const speakButton = document.querySelector("#speak");
 
-  function populateVoices()
-  {
+//grabbing stop button
+const stopButton = document.querySelector("#stop");
 
-    voices = this.getVoices();
-    const voiceOptions = voices
-    // .filter(function(voice){
-    //     voice.lang.includes("en");
-    // })
-    .map(function(voice){
-        return ` <option value=${voice.name}> ${voice.name} (${voice.lang})</option>`;
+//read whats written in text area by putting it into text property of message
+msg.text = document.querySelector("[name='text']").value;
 
+//function for populating array with voices fetched
+function populateVoices()
+{
+    //putting all voices into empty array
+     voices = this.getVoices();
+
+      
+     const voicesOption = voices
+     .map(function (voice){
+         return `<option value='${voice.name}'> ${voice.name} (${voice.lang})</option>`
+     })
+     .join('');
+     voicesDropdown.innerHTML = voicesOption;
+}
+
+//function for setting voice in voice Dropdown
+function setVoice()
+{
+
+    //return the first element if voice.name matches voicesDropdown's value  
+    msg.voice = voices.find(function (voice){
+        if( voice.name === voicesDropdown.value)
+        {
+            return true;
+        }
     })
-    .join('');
 
-    voicesDropdown.innerHTML = voiceOptions;
-    
-  }
-
-
-  function setVoice()
-  {
-
-    //we need to find the corresponding speech synthesis voice object
-    msg.voice = voices.find( function( voice){
-        return voice.name === this.value;
-    })  
-
-  }
-
-
-  function toggle(startOver = true)
-  {
-
-    //stop from speaking
-      speechSynthesis.cancel();
-
-      if( startOver)
-      {
-      //start over
-      speechSynthesis.speak(msg);
-      }
-
-  }
-
-  function setOption()
-  {
-
-    console.log(this.name, this.value);
-
-    msg[this.name] = this.value;
+    //call toggle when voiceDropdown is set to some voice
     toggle();
 
-  }
+}
 
-  //speech synthesis is a global variable that lives in the browser
-  //if voices changed, populate voices
-  speechSynthesis.addEventListener("voiceschanged",populateVoices);
+//making voice work on toggle
+function toggle(startOver = true)
+{
+    speechSynthesis.cancel(msg);
 
-  //if voice changed, call setVoice
-  voicesDropdown.addEventListener("change",setVoice);
+    if( startOver )
+    {
+    speechSynthesis.speak(msg);
+    }
+}
 
+function setOption()
+{
+    //setting msg's property to a particular value
+    msg[this.name] = this.value;
 
-  //if option is changed call setoption
-  options.forEach(function (option){
-      option.addEventListener("change", setOption)
-  })
+    // call toggle when options changed
+    toggle();
+}
 
-  //if speak button is clicked call toggle
-  speakButton.addEventListener("click", toggle);
+//if voiceschanged event is delivered to speechSynthesis variable, call populate voices funct
+speechSynthesis.addEventListener("voiceschanged",populateVoices);
 
-  //if stop button is clicked, call toggle 
-  stopButton.addEventListener("click", function(){
-      toggle(false);
-  });
+//if voicesDropdown is clicked, call set voices 
+voicesDropdown.addEventListener("click", setVoice);
+
+//if any of the option's values change, call setOptions
+options.forEach( function (option){
+    option.addEventListener('change', setOption);
+})
+
+//if stop clicked, stop speech
+stopButton.addEventListener("click", function (){
+    toggle(false);
+})
+
+//if start clicked, start speech
+speakButton.addEventListener("click", toggle);
